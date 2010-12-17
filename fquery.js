@@ -20,16 +20,13 @@
 	THE SOFTWARE.
 */
 
-
 function fQuery() {
 
 	// Define global variables
-
 	var args = arguments;
 	var m;
 
 	// Argument handler
-
 	if (args[0] && args[0].substr(0,1) == "@") {
 
 		// If first argument is an fQuery modifier
@@ -40,14 +37,12 @@ function fQuery() {
 		}
 
 	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] != "") {
-
 		// If first argument is a valid jQuery selector
 		fQuery.$ = jQuery(args[0]);
 	}
 
 	if (!fQuery._init) {
 		fQuery._init = {
-
 			alias : function() {
 
 				var arr, obj, key;
@@ -73,7 +68,6 @@ function fQuery() {
 
 				fQuery._reset();
 			},
-
 			extend : function() {
 
 				var arr, arg, copy, key, n;
@@ -113,15 +107,12 @@ function fQuery() {
 
 				fQuery._reset();
 			},
-
 			_reset : function() {
 				fQuery._modifier = new Array();
 			},
-
 			$ : function() {
 				return fQuery.$;
 			},
-
 			append : function(o) {
 
 				fQuery.$.each(function() {
@@ -145,7 +136,6 @@ function fQuery() {
 					}
 				});
 			},
-
 			include : function(filename) {
 
 				var filetype = filename.split(".");
@@ -172,8 +162,8 @@ function fQuery() {
 					document.getElementsByTagName("head")[0].appendChild(obj);
 				}
 			},
-
 			count : function(o) {
+
 
 				var c = 0;
 
@@ -185,7 +175,6 @@ function fQuery() {
 
 				return c;
 			},
-
 			log : function() {
 
 				if (typeof(console) != "undefined") {
@@ -193,13 +182,7 @@ function fQuery() {
 				}
 			}
 		};
-
 		jQuery.extend(fQuery, fQuery._init);
-
 	}
-
 	return fQuery._init;
 }
-
-fQuery().alias('mcsquare');
-
