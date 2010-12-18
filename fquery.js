@@ -136,32 +136,6 @@ function fQuery() {
 					}
 				});
 			},
-			include : function(filename) {
-
-				var filetype = filename.split(".");
-				var obj;
-
-				filetype = filetype[filetype.length-1];
-
-				switch (filetype) {
-					case "js":
-						obj = document.createElement('script');
-						obj.setAttribute("type","text/javascript");
-						obj.setAttribute("src", filename);
-					break;
-
-					case "css":
-						obj = document.createElement("link");
-						obj.setAttribute("rel", "stylesheet");
-						obj.setAttribute("type", "text/css");
-						obj.setAttribute("href", filename);
-					break;
-				}
-
-				if (typeof obj != "undefined") {
-					document.getElementsByTagName("head")[0].appendChild(obj);
-				}
-			},
 			count : function(o) {
 
 
