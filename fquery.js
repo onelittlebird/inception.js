@@ -177,24 +177,24 @@ function fQuery() {
 					var tab = getTab(l);
 
 					if (l > 0) {
-						this.log(tab.replace("    ","") + "{");
+						fQuery.log(tab.replace("    ","") + "{");
 					} else {
-						this.log("{");
+						fQuery.log("{");
 					}
 
 					var obj = arguments[0].object;
 
 					for (var a in obj) {
-						this.log(tab + a + " => " + typeof(obj[a]));
+						fQuery.log(tab + a + " => " + typeof(obj[a]));
 						if (typeof(obj[a]) == "object") {
 							dump({object: obj[a]});
 						}
 					}
 
 					if (l > 0) {
-						this.log(tab.replace("    ","") + "}");
+						fQuery.log(tab.replace("    ","") + "}");
 					} else {
-						this.log("}");
+						fQuery.log("}");
 					}
 				}
 
