@@ -117,6 +117,8 @@ function fQuery() {
 			$ : function() {
 				return fQuery.$;
 			},
+
+			// Faster than jQueries append, but lets you pass through css and attribute objects to jQuery.
 			append : function(o) {
 
 				fQuery.$.each(function() {
