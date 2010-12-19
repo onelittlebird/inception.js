@@ -170,35 +170,35 @@ function fQuery() {
 					return t;
 				}
 
-				var level = 0;
-				var inter = function() {
-					var l = level;
-					level++;
-					var tab = getTab(level);
+				var l = 0;
+				var dump = function() {
+					var level = l;
+					l++;
+					var tab = getTab(l);
 
 					if (l > 0) {
-						console.log(tab.replace("    ","") + "{");
+						this.log(tab.replace("    ","") + "{");
 					} else {
-						console.log("{");
+						this.log("{");
 					}
 
 					var obj = arguments[0].object;
 
 					for (var a in obj) {
-						console.log(tab + a + " => " + typeof(obj[a]));
+						this.log(tab + a + " => " + typeof(obj[a]));
 						if (typeof(obj[a]) == "object") {
-							inter({object: obj[a]});
+							dump({object: obj[a]});
 						}
 					}
 
 					if (l > 0) {
-						console.log(tab.replace("    ","") + "}");
+						this.log(tab.replace("    ","") + "}");
 					} else {
-						console.log("}");
+						this.log("}");
 					}
 				}
 
-				inter({object: obj});
+				dump({object: obj});
 			}
 		};
 		jQuery.extend(fQuery, fQuery._init);
