@@ -158,6 +158,45 @@ function fQuery() {
 				if (typeof(console) != "undefined") {
 					console.log(arguments[0]);
 				}
+			},
+			dump : function() {
+				var getTab = function() {
+					var t = "";
+					for (i=0; i < arguments[0]; i++) {
+						t += "    ";
+					}
+					return t;
+				}
+
+				var level = 0;
+				var inter = function() {
+					var l = level;
+					level++;
+					var tab = getTab(level);
+
+					if (l > 0) {
+						console.log(tab.replace("    ","") + "{");
+					} else {
+						console.log("{");
+					}
+
+					var obj = arguments[0].object;
+
+					for (var a in obj) {
+						console.log(tab + a + " => " + typeof(obj[a]));
+						if (typeof(obj[a]) == "object") {
+							inter({object: obj[a]});
+						}
+					}
+
+					if (l > 0) {
+						console.log(tab.replace("    ","") + "}");
+					} else {
+						console.log("}");
+					}
+				}
+
+				inter({object: obj});
 			}
 		};
 		jQuery.extend(fQuery, fQuery._init);
