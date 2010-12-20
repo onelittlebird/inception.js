@@ -111,8 +111,8 @@ function fQuery() {
 						var offset = string.indexOf("{");
 						var body = string.substr(offset+1,string.length-offset-2);
 
-						if (body.indexOf("@CONTEXT;") != "-1") {
-							body = body.replace("@CONTEXT;", o.body);
+						if (body.indexOf("@FUNCTION;") != "-1") {
+							body = body.replace("@FUNCTION", o.body);
 							return body;
 						} else {
 							return body + o.body;
