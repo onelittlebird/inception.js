@@ -70,7 +70,7 @@ function fQuery() {
 			},
 			extend : function() {
 
-				var arr, arg, copy, key, n;
+				var arr, arg, copy, key, n, wrapper;
 
 				for (i=0; i < fQuery._modifier.length; i++) {
 
@@ -79,6 +79,7 @@ function fQuery() {
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
 					arg = arguments[0];
+					wrapper = new Array();
 					n = 0;
 
 					for (var k in arr) {
@@ -93,6 +94,9 @@ function fQuery() {
 								copy['function'][key] = {};
 								copy['object'][key] = {};
 							}
+							if (typeof(copy['object'][key]._wrapper) != "undefined") {
+								wrapper.push(copy['object'][key]._wrapper);
+							}
 
 							copy['function'] = copy['function'][key];
 							copy['object'] = copy['object'][key];
@@ -101,8 +105,80 @@ function fQuery() {
 						n++;
 					}
 
+					var wrap = function(o) {
+
+						var string = o.wrapper.toString();
+						var offset = string.indexOf("{");
+						var body = string.substr(offset+1,string.length-offset-2);
+
+						if (body.indexOf("@CONTEXT;") != "-1") {
+							body = body.replace("@CONTEXT;", o.body);
+							return body;
+						} else {
+							return body + o.body;
+						}
+					}
+
+					var loop = function() {
+						var obj = arguments[0].object;
+
+						for (var a in obj) {
+							if (typeof(obj[a]) == "object") {
+								new loop({object: obj[a]});
+							}
+							if (typeof(obj[a]) == "function") {
+
+								var string = obj[a].toString();
+								var offset = string.indexOf("{");
+								var head = string.substr(0, offset);
+								var args = head.substr(head.indexOf("(")).replace("(","").replace(")","").split(",");
+								var body = string.substr(offset+1,string.length-offset-2);
+
+								var i = wrapper.length;
+								for (var i=wrapper.length-1; i>=0; i--) {
+									body = wrap({body: body, wrapper: wrapper[i]});
+								}
+
+								obj[a] = new Function(args, "{"+body+"}");
+							}
+						}
+					}
+
+					new loop({object: arg});
+
 					this._extend(true, copy['function'], arg);
 					this._extend(true, copy['object'], arg);
+				}
+
+				fQuery._reset();
+			},
+			wrap : function() {
+
+				var arr, arg, copy, key;
+
+				for (i=0; i < fQuery._modifier.length; i++) {
+
+					arr = fQuery._modifier[i] ? fQuery._modifier[i].split(".") : '';
+					copy = new Array();
+					copy['function'] = fQuery._init;
+					copy['object'] = fQuery;
+					arg = arguments[0];
+
+					for (var k in arr) {
+						key = arr[k];
+
+						if (!copy['function'][key]) {
+
+							copy['function'][key] = {};
+							copy['object'][key] = {};
+						}
+
+						copy['function'] = copy['function'][key];
+						copy['object'] = copy['object'][key];
+					}
+
+					copy['function']._wrapper = arg;
+					copy['object']._wrapper = arg;
 				}
 
 				fQuery._reset();
@@ -162,43 +238,25 @@ function fQuery() {
 				}
 			},
 			dump : function() {
-				var getTab = function() {
-					var t = "";
-					for (i=0; i < arguments[0]; i++) {
-						t += "    ";
-					}
-					return t;
-				}
-
-				var l = 0;
 				var dump = function() {
-					var level = l;
-					l++;
-					var tab = getTab(l);
 
-					if (l > 0) {
-						fQuery.log(tab.replace("    ","") + "{");
-					} else {
-						fQuery.log("{");
-					}
+					fQuery.log("{");
 
 					var obj = arguments[0].object;
 
 					for (var a in obj) {
-						fQuery.log(tab + a + " => " + typeof(obj[a]));
+						fQuery.log(a + " => " + typeof(obj[a]));
 						if (typeof(obj[a]) == "object") {
 							dump({object: obj[a]});
 						}
 					}
 
-					if (l > 0) {
-						fQuery.log(tab.replace("    ","") + "}");
-					} else {
-						fQuery.log("}");
-					}
+					fQuery.log("}");
 				}
 
-				dump({object: obj});
+				var payload = (typeof(arguments[0]) == "object") ? arguments[0] : fQuery._init;
+
+				dump({object: payload});
 			}
 		};
 		jQuery.extend(fQuery, fQuery._init);
