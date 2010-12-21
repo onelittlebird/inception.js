@@ -31,12 +31,12 @@ function fQuery() {
 	if (args[0] && args[0].substr(0,1) == "@") {
 
 
-		// If first argument is an fQuery modifier
+		// If first argument is an fQuery node
 
 		fQuery._reset();
 		m = args[0].split(" ");
 		for (i=0; i < m.length; i++) {
-			fQuery._modifier.push(m[i].replace("@", ""));
+			fQuery._node.push(m[i].replace("@", ""));
 		}
 
 	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] != "") {
@@ -56,9 +56,9 @@ function fQuery() {
 
 				// Create alias for selected node
 
-				if (fQuery._modifier && fQuery._modifier[0]) {
+				if (fQuery._node && fQuery._node[0]) {
 
-					arr = fQuery._modifier[0] ? fQuery._modifier[0].split(".") : '';
+					arr = fQuery._node[0] ? fQuery._node[0].split(".") : '';
 					obj = fQuery();
 
 					for (var i in arr) {
@@ -85,9 +85,9 @@ function fQuery() {
 
 				// Extend argument object(s) and function(s) to the end of the node chain
 
-				for (i=0; i < fQuery._modifier.length; i++) {
+				for (i=0; i < fQuery._node.length; i++) {
 
-					arr = fQuery._modifier[i] ? fQuery._modifier[i].split(".") : '';
+					arr = fQuery._node[i] ? fQuery._node[i].split(".") : '';
 					copy = new Array();
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
@@ -169,14 +169,14 @@ function fQuery() {
 
 					// Apply new object(s) to the fQuery tree
 
-					this._extend(true, copy['function'], arg);
-					this._extend(true, copy['object'], arg);
+					jQuery.extend(true, copy['function'], arg);
+					jQuery.extend(true, copy['object'], arg);
 				}
 
 
 				// If the extend targets the top node (can only be applied with an object)
 
-				if (typeof(fQuery._modifier[0]) == "undefined" && typeof(arguments[0]) == "object") {
+				if (typeof(fQuery._node[0]) == "undefined" && typeof(arguments[0]) == "object") {
 
 					copy = new Array();
 					copy['function'] = fQuery._init;
@@ -191,7 +191,7 @@ function fQuery() {
 				}
 
 
-				// Reset the _modifier to an empty array
+				// Reset the _node to an empty array
 
 				fQuery._reset();
 			},
@@ -203,9 +203,9 @@ function fQuery() {
 
 				// Create wrapper for selected node(s)
 
-				for (i=0; i < fQuery._modifier.length; i++) {
+				for (i=0; i < fQuery._node.length; i++) {
 
-					arr = fQuery._modifier[i] ? fQuery._modifier[i].split(".") : '';
+					arr = fQuery._node[i] ? fQuery._node[i].split(".") : '';
 					copy = new Array();
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
@@ -229,25 +229,17 @@ function fQuery() {
 				}
 
 
-				// Reset the _modifier to an empty array
+				// Reset the _node to an empty array
 
 				fQuery._reset();
-			},
-
-			_extend : function() {
-
-
-				// jQuery extend function (compressed) - will be replaced in the future to something cleaner.
-
-				class2type={};hasOwn=Object.prototype.hasOwnProperty;var f={type:function(i){return i==null?String(i):class2type[toString.call(i)]||"object"},isWindow:function(i){return i&&typeof i==="object"&&"setInterval" in i},isFunction:function(i){return this.type(i)==="function"},isArray:Array.isArray||function(i){return this.type(i)==="array"},isPlainObject:function(m){if(!m||this.type(m)!=="object"||m.nodeType||this.isWindow(m)){return false}if(m.constructor&&!hasOwn.call(m,"constructor")&&!hasOwn.call(m.constructor.prototype,"isPrototypeOf")){return false}var i;for(i in m){}return i===undefined||hasOwn.call(m,i)}};var l,c,a,b,h,j,g=arguments[0]||{},e=1,d=arguments.length,k=false;if(typeof g==="boolean"){k=g;g=arguments[1]||{};e=2}if(typeof g!=="object"&&!f.isFunction(g)){g={}}for(;e<d;e++){if((l=arguments[e])!=null){for(c in l){a=g[c];b=l[c];if(g===b){continue}if(k&&b&&(f.isPlainObject(b)||(h=f.isArray(b)))){if(h){h=false;j=a&&f.isArray(a)?a:[]}else{j=a&&f.isPlainObject(a)?a:{}}g[c]=this._extend(k,j,b)}else{if(b!==undefined){g[c]=b}}}}}return g
 			},
 
 			_reset : function() {
 
 
-				// Reset the _modifier to an empty array
+				// Reset the _node to an empty array
 
-				fQuery._modifier = new Array();
+				fQuery._node = new Array();
 			},
 
 			$ : function() {
@@ -341,3 +333,5 @@ function fQuery() {
 	}
 	return fQuery._init;
 }
+
+fQuery();
