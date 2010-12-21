@@ -329,7 +329,7 @@ function fQuery() {
 			}
 		};
 
-		jQuery.extend(fQuery, fQuery._init);
+		fQuery._extend(fQuery, fQuery._init);
 	}
 	return fQuery._init;
 }
