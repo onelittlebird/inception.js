@@ -22,14 +22,17 @@
 
 function fQuery() {
 
-	// Define global variables
 	var args = arguments;
 	var m;
 
+
 	// Argument handler
+
 	if (args[0] && args[0].substr(0,1) == "@") {
 
+
 		// If first argument is an fQuery modifier
+
 		fQuery._reset();
 		m = args[0].split(" ");
 		for (i=0; i < m.length; i++) {
@@ -37,7 +40,10 @@ function fQuery() {
 		}
 
 	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] != "") {
+
+
 		// If first argument is a valid jQuery selector
+
 		fQuery.$ = jQuery(args[0]);
 	}
 
@@ -46,6 +52,9 @@ function fQuery() {
 			alias : function() {
 
 				var arr, obj, key;
+
+
+				// Create alias for selected node
 
 				if (fQuery._modifier && fQuery._modifier[0]) {
 
@@ -68,9 +77,13 @@ function fQuery() {
 
 				fQuery._reset();
 			},
+
 			extend : function() {
 
 				var arr, arg, copy, key, n, wrapper;
+
+
+				// Extend argument object(s) and function(s) to the end of the node chain
 
 				for (i=0; i < fQuery._modifier.length; i++) {
 
@@ -81,6 +94,9 @@ function fQuery() {
 					arg = arguments[0];
 					wrapper = new Array();
 					n = 0;
+
+
+					// Crawl to the last object of the chain
 
 					for (var k in arr) {
 						if (n == arr.length-1 && typeof(arg) == "function") {
@@ -105,7 +121,10 @@ function fQuery() {
 						n++;
 					}
 
-					var wrap = function(o) {
+
+					// Apply node wrappers (if any) to node functions
+
+					var fetchWrapper = function(o) {
 
 						var string = o.wrapper.toString();
 						var offset = string.indexOf("{");
@@ -119,12 +138,13 @@ function fQuery() {
 						}
 					}
 
-					var loop = function() {
+					var applyWrapper = function() {
+
 						var obj = arguments[0].object;
 
 						for (var a in obj) {
 							if (typeof(obj[a]) == "object") {
-								new loop({object: obj[a]});
+								new applyWrapper({object: obj[a]});
 							}
 							if (typeof(obj[a]) == "function") {
 
@@ -136,7 +156,7 @@ function fQuery() {
 
 								var i = wrapper.length;
 								for (var i=wrapper.length-1; i>=0; i--) {
-									body = wrap({body: body, wrapper: wrapper[i]});
+									body = fetchWrapper({body: body, wrapper: wrapper[i]});
 								}
 
 								obj[a] = new Function(args, "{"+body+"}");
@@ -144,17 +164,44 @@ function fQuery() {
 						}
 					}
 
-					new loop({object: arg});
+					new applyWrapper({object: arg});
+
+
+					// Apply new object(s) to the fQuery tree
 
 					this._extend(true, copy['function'], arg);
 					this._extend(true, copy['object'], arg);
 				}
 
+
+				// If the extend targets the top node (can only be applied with an object)
+
+				if (typeof(fQuery._modifier[0]) == "undefined" && typeof(arguments[0]) == "object") {
+
+					copy = new Array();
+					copy['function'] = fQuery._init;
+					copy['object'] = fQuery;
+					arg = arguments[0];
+
+					this._extend(true, copy['function'], arg);
+
+					for (var o in arg) {
+						copy['object'][o] = arg[o];
+					}
+				}
+
+
+				// Reset the _modifier to an empty array
+
 				fQuery._reset();
 			},
+
 			wrap : function() {
 
 				var arr, arg, copy, key;
+
+
+				// Create wrapper for selected node(s)
 
 				for (i=0; i < fQuery._modifier.length; i++) {
 
@@ -181,21 +228,40 @@ function fQuery() {
 					copy['object']._wrapper = arg;
 				}
 
+
+				// Reset the _modifier to an empty array
+
 				fQuery._reset();
 			},
+
 			_extend : function() {
-				// jQuery extend function (compressed)
+
+
+				// jQuery extend function (compressed) - will be replaced in the future to something cleaner.
+
 				class2type={};hasOwn=Object.prototype.hasOwnProperty;var f={type:function(i){return i==null?String(i):class2type[toString.call(i)]||"object"},isWindow:function(i){return i&&typeof i==="object"&&"setInterval" in i},isFunction:function(i){return this.type(i)==="function"},isArray:Array.isArray||function(i){return this.type(i)==="array"},isPlainObject:function(m){if(!m||this.type(m)!=="object"||m.nodeType||this.isWindow(m)){return false}if(m.constructor&&!hasOwn.call(m,"constructor")&&!hasOwn.call(m.constructor.prototype,"isPrototypeOf")){return false}var i;for(i in m){}return i===undefined||hasOwn.call(m,i)}};var l,c,a,b,h,j,g=arguments[0]||{},e=1,d=arguments.length,k=false;if(typeof g==="boolean"){k=g;g=arguments[1]||{};e=2}if(typeof g!=="object"&&!f.isFunction(g)){g={}}for(;e<d;e++){if((l=arguments[e])!=null){for(c in l){a=g[c];b=l[c];if(g===b){continue}if(k&&b&&(f.isPlainObject(b)||(h=f.isArray(b)))){if(h){h=false;j=a&&f.isArray(a)?a:[]}else{j=a&&f.isPlainObject(a)?a:{}}g[c]=this._extend(k,j,b)}else{if(b!==undefined){g[c]=b}}}}}return g
 			},
+
 			_reset : function() {
+
+
+				// Reset the _modifier to an empty array
+
 				fQuery._modifier = new Array();
 			},
+
 			$ : function() {
+
+
+				// Returns a jQuery object
+
 				return fQuery.$;
 			},
 
-			// Faster than jQueries append, but lets you pass through css and attribute objects to jQuery.
 			append : function(o) {
+
+
+				// Faster than jQueries append, but lets you pass through css, bind and attribute objects to jQuery.
 
 				fQuery.$.each(function() {
 
@@ -211,15 +277,17 @@ function fQuery() {
 					}
 
 					if (o.bind) {
-
 						for (var k in o.bind) {
 							$(obj).bind(k, o.bind[k]);
 						}
 					}
 				});
 			},
+
 			count : function(o) {
 
+
+				// Count number of child nodes in selected object
 
 				var c = 0;
 
@@ -231,13 +299,22 @@ function fQuery() {
 
 				return c;
 			},
+
 			log : function() {
+
+
+				// Check if console is available
 
 				if (typeof(console) != "undefined") {
 					console.log(arguments[0]);
 				}
 			},
+
 			dump : function() {
+
+
+				// A var_dump function
+
 				var dump = function() {
 
 					fQuery.log("{");
@@ -259,6 +336,7 @@ function fQuery() {
 				dump({object: payload});
 			}
 		};
+
 		jQuery.extend(fQuery, fQuery._init);
 	}
 	return fQuery._init;
