@@ -47,7 +47,82 @@ function fQuery() {
 		fQuery.$ = jQuery(args[0]);
 	}
 
-	if (!fQuery._init) {
+	if (typeof(fQuery._init) == "undefined") {
+
+
+		// Declare internal functions
+
+		fQuery._internals = {
+			wrapper : function() {
+
+				var selector = sel = fQuery.$;
+			},
+
+			parseFunction : function() {
+
+				var string = arguments[0].toString();
+				var offset = string.indexOf("{");
+				var head = string.substr(0, offset);
+				var args = head.substr(head.indexOf("(")).replace("(","").replace(")","").replace(/ /g,"").split(",");
+				var body = string.substr(offset+1,string.length-offset-2);
+
+				return {
+					head : head,
+					args : args,
+					body : body
+				}
+			},
+
+			mergeFunctions : function() {
+
+				var p1 = fQuery._internals.parseFunction(arguments[0]);
+				var p2 = fQuery._internals.parseFunction(arguments[1]);
+
+				var body = p1.body + p2.body;
+				var args;
+
+				if (p1.args[0] != "") {
+					args = p1.args;
+
+					if (p2.args[0] != "") {
+						args = args.concat(p2.args);
+					}
+				} else if (p2.args[0] != "") {
+					args = p2.args;
+				}
+
+				if (args) {
+					return new Function(args, "{"+body+"}");
+				} else {
+					return new Function("{"+body+"}");
+				}
+			},
+
+			count : function(o) {
+
+
+				// Count number of child nodes in selected object
+
+				var c = 0;
+
+				for (var k in o) {
+					if (o.hasOwnProperty(k)) {
+						++c;
+					}
+				}
+
+				return c;
+			}
+		}
+
+
+		// Set default top node wrapper
+
+		fQuery._wrapper = fQuery._internals.wrapper;
+
+
+		// Declare and initialize core functions
+
 		fQuery._init = {
 			alias : function() {
 
@@ -93,6 +168,7 @@ function fQuery() {
 					copy['object'] = fQuery;
 					arg = arguments[0];
 					wrapper = new Array();
+					wrapper.push(fQuery._wrapper);
 					n = 0;
 
 
@@ -124,21 +200,19 @@ function fQuery() {
 
 					// Apply node wrappers (if any) to node functions
 
-					var fetchWrapper = function(o) {
-
-						var string = o.wrapper.toString();
-						var offset = string.indexOf("{");
-						var body = string.substr(offset+1,string.length-offset-2);
-
-						if (body.indexOf("@FUNCTION;") != "-1") {
-							body = body.replace("@FUNCTION", o.body);
-							return body;
-						} else {
-							return body + o.body;
-						}
-					}
-
 					var applyWrapper = function() {
+
+						var fetchWrapper = function(o) {
+
+							var f = fQuery._internals.parseFunction(o.wrapper);
+							var body;
+
+							if (f.body.indexOf("@FUNCTION;") != "-1") {
+								return f.body.replace("@FUNCTION", o.body);
+							} else {
+								return f.body + o.body;
+							}
+						}
 
 						var obj = arguments[0].object;
 
@@ -148,13 +222,12 @@ function fQuery() {
 							}
 							if (typeof(obj[a]) == "function") {
 
-								var string = obj[a].toString();
-								var offset = string.indexOf("{");
-								var head = string.substr(0, offset);
-								var args = head.substr(head.indexOf("(")).replace("(","").replace(")","").split(",");
-								var body = string.substr(offset+1,string.length-offset-2);
-
+								var f = fQuery._internals.parseFunction(obj[a]);
 								var i = wrapper.length;
+
+								body = f.body;
+								args = f.args;
+
 								for (var i=wrapper.length-1; i>=0; i--) {
 									body = fetchWrapper({body: body, wrapper: wrapper[i]});
 								}
@@ -174,7 +247,7 @@ function fQuery() {
 				}
 
 
-				// If the extend targets the top node (can only be applied with an object)
+				// If the extend targets the top node (can only be applied with an object, else fQuery would be overridden)
 
 				if (typeof(fQuery._node[0]) == "undefined" && typeof(arguments[0]) == "object") {
 
@@ -198,7 +271,8 @@ function fQuery() {
 
 			wrap : function() {
 
-				var arr, arg, copy, key;
+				var arr, copy, key;
+				var arg = arguments[0];
 
 
 				// Create wrapper for selected node(s)
@@ -209,7 +283,6 @@ function fQuery() {
 					copy = new Array();
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
-					arg = arguments[0];
 
 					for (var k in arr) {
 						key = arr[k];
@@ -229,6 +302,21 @@ function fQuery() {
 				}
 
 
+				// Create wrapper for top node (and merge with default top node wrapper)
+
+				if (fQuery._node.length == 0) {
+					copy = new Array();
+					copy['function'] = fQuery._init;
+					copy['object'] = fQuery;
+
+					arg = fQuery._internals.mergeFunctions(fQuery._internals.wrapper, arg);
+
+					copy['function']._wrapper = arg;
+					copy['object']._wrapper = arg;
+					console.log(arg);
+				}
+
+
 				// Reset the _node to an empty array
 
 				fQuery._reset();
@@ -240,14 +328,6 @@ function fQuery() {
 				// Reset the _node to an empty array
 
 				fQuery._node = new Array();
-			},
-
-			$ : function() {
-
-
-				// Returns a jQuery object
-
-				return fQuery.$;
 			},
 
 			append : function(o) {
@@ -274,22 +354,6 @@ function fQuery() {
 						}
 					}
 				});
-			},
-
-			count : function(o) {
-
-
-				// Count number of child nodes in selected object
-
-				var c = 0;
-
-				for (var k in o) {
-					if (o.hasOwnProperty(k)) {
-						++c;
-					}
-				}
-
-				return c;
 			},
 
 			log : function() {
@@ -329,7 +393,7 @@ function fQuery() {
 			}
 		};
 
-		fQuery._extend(fQuery, fQuery._init);
+		jQuery.extend(fQuery, fQuery._init);
 	}
 	return fQuery._init;
 }
