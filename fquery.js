@@ -33,7 +33,7 @@ function fQuery() {
 
 		// If first argument is an fQuery node
 
-		fQuery._reset();
+		fQuery._node = new Array();
 		m = args[0].split(" ");
 		for (i=0; i < m.length; i++) {
 			fQuery._node.push(m[i].replace("@", ""));
@@ -150,12 +150,53 @@ function fQuery() {
 					}
 				}
 
-				fQuery._reset();
+				fQuery._node = new Array();
 			},
 
 			extend : function() {
 
 				var arr, arg, copy, key, n, wrapper;
+
+
+				// Declare wrapper function
+
+				var applyWrapper = function() {
+
+					var fetchWrapper = function(o) {
+
+						var f = fQuery._internals.parseFunction(o.wrapper);
+						var body;
+
+						if (f.body.indexOf("@FUNCTION;") != "-1") {
+							return f.body.replace("@FUNCTION", o.body);
+						} else {
+							return f.body + o.body;
+						}
+					}
+
+					var obj = arguments[0].object;
+					var wrapper = arguments[0].wrapper;
+
+					for (var a in obj) {
+						if (typeof(obj[a]) == "object") {
+							new applyWrapper({object: obj[a]});
+						}
+						if (typeof(obj[a]) == "function") {
+
+							var f = fQuery._internals.parseFunction(obj[a]);
+							var i = wrapper.length;
+
+							body = f.body;
+							args = f.args;
+
+							for (var i=wrapper.length-1; i>=0; i--) {
+								body = fetchWrapper({body: body, wrapper: wrapper[i]});
+							}
+
+							obj[a] = new Function(args, "{"+body+"}");
+						}
+					}
+				}
 
 
 				// Extend argument object(s) and function(s) to the end of the node chain
@@ -200,44 +241,7 @@ function fQuery() {
 
 					// Apply node wrappers (if any) to node functions
 
-					var applyWrapper = function() {
-
-						var fetchWrapper = function(o) {
-
-							var f = fQuery._internals.parseFunction(o.wrapper);
-							var body;
-
-							if (f.body.indexOf("@FUNCTION;") != "-1") {
-								return f.body.replace("@FUNCTION", o.body);
-							} else {
-								return f.body + o.body;
-							}
-						}
-
-						var obj = arguments[0].object;
-
-						for (var a in obj) {
-							if (typeof(obj[a]) == "object") {
-								new applyWrapper({object: obj[a]});
-							}
-							if (typeof(obj[a]) == "function") {
-
-								var f = fQuery._internals.parseFunction(obj[a]);
-								var i = wrapper.length;
-
-								body = f.body;
-								args = f.args;
-
-								for (var i=wrapper.length-1; i>=0; i--) {
-									body = fetchWrapper({body: body, wrapper: wrapper[i]});
-								}
-
-								obj[a] = new Function(args, "{"+body+"}");
-							}
-						}
-					}
-
-					new applyWrapper({object: arg});
+					new applyWrapper({object: arg, wrapper: wrapper});
 
 
 					// Apply new object(s) to the fQuery tree
@@ -252,9 +256,17 @@ function fQuery() {
 				if (typeof(fQuery._node[0]) == "undefined" && typeof(arguments[0]) == "object") {
 
 					copy = new Array();
+					wrapper = new Array();
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
 					arg = arguments[0];
+					wrapper.push(fQuery._wrapper);
+
+
+					// Apply node wrappers (if any) to node functions
+
+					new applyWrapper({object: arg, wrapper: wrapper});
+
 
 					jQuery.extend(true, copy['function'], arg);
 
@@ -266,7 +278,7 @@ function fQuery() {
 
 				// Reset the _node to an empty array
 
-				fQuery._reset();
+				fQuery._node = new Array();
 			},
 
 			wrap : function() {
@@ -313,16 +325,7 @@ function fQuery() {
 
 					copy['function']._wrapper = arg;
 					copy['object']._wrapper = arg;
-					console.log(arg);
 				}
-
-
-				// Reset the _node to an empty array
-
-				fQuery._reset();
-			},
-
-			_reset : function() {
 
 
 				// Reset the _node to an empty array
@@ -363,38 +366,18 @@ function fQuery() {
 
 				if (typeof(console) != "undefined") {
 					console.log(arguments[0]);
+				} else {
+					alert(arguments[0]);
 				}
-			},
-
-			dump : function() {
-
-
-				// A var_dump function
-
-				var dump = function() {
-
-					fQuery.log("{");
-
-					var obj = arguments[0].object;
-
-					for (var a in obj) {
-						fQuery.log(a + " => " + typeof(obj[a]));
-						if (typeof(obj[a]) == "object") {
-							dump({object: obj[a]});
-						}
-					}
-
-					fQuery.log("}");
-				}
-
-				var payload = (typeof(arguments[0]) == "object") ? arguments[0] : fQuery._init;
-
-				dump({object: payload});
 			}
 		};
 
+
+		// Merge core functions with the fQuery object
+
 		jQuery.extend(fQuery, fQuery._init);
 	}
+
 	return fQuery._init;
 }
 
