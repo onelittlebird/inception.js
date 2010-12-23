@@ -256,7 +256,7 @@ function fQuery() {
 					copy['object'] = fQuery;
 					arg = arguments[0];
 
-					this._extend(true, copy['function'], arg);
+					jQuery.extend(true, copy['function'], arg);
 
 					for (var o in arg) {
 						copy['object'][o] = arg[o];
