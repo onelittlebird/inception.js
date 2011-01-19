@@ -39,7 +39,7 @@ function fQuery() {
 			fQuery._node.push(m[i].replace("@", ""));
 		}
 
-	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] != "") {
+	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] !== "") {
 
 
 		// If first argument is a valid jQuery selector
@@ -70,7 +70,7 @@ function fQuery() {
 					head : head,
 					args : args,
 					body : body
-				}
+				};
 			},
 
 			mergeFunctions : function() {
@@ -81,13 +81,13 @@ function fQuery() {
 				var body = p1.body + p2.body;
 				var args;
 
-				if (p1.args[0] != "") {
+				if (p1.args[0] !== "") {
 					args = p1.args;
 
-					if (p2.args[0] != "") {
+					if (p2.args[0] !== "") {
 						args = args.concat(p2.args);
 					}
-				} else if (p2.args[0] != "") {
+				} else if (p2.args[0] !== "") {
 					args = p2.args;
 				}
 
@@ -113,7 +113,7 @@ function fQuery() {
 
 				return c;
 			}
-		}
+		};
 
 
 		// Set default top node wrapper
@@ -172,7 +172,7 @@ function fQuery() {
 						} else {
 							return f.body + o.body;
 						}
-					}
+					};
 
 					var obj = arguments[0].object;
 					var wrapper = arguments[0].wrapper;
@@ -184,7 +184,6 @@ function fQuery() {
 						if (typeof(obj[a]) == "function") {
 
 							var f = fQuery._internals.parseFunction(obj[a]);
-							var i = wrapper.length;
 
 							body = f.body;
 							args = f.args;
@@ -196,7 +195,7 @@ function fQuery() {
 							obj[a] = new Function(args, "{"+body+"}");
 						}
 					}
-				}
+				};
 
 
 				// Extend argument object(s) and function(s) to the end of the node chain
@@ -316,7 +315,7 @@ function fQuery() {
 
 				// Create wrapper for top node (and merge with default top node wrapper)
 
-				if (fQuery._node.length == 0) {
+				if (fQuery._node.length === 0) {
 					copy = new Array();
 					copy['function'] = fQuery._init;
 					copy['object'] = fQuery;
