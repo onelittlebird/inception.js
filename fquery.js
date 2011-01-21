@@ -167,8 +167,8 @@ function fQuery() {
 						var f = fQuery._internals.parseFunction(o.wrapper);
 						var body;
 
-						if (f.body.indexOf("@FUNCTION;") != "-1") {
-							return f.body.replace("@FUNCTION", o.body);
+						if (f.body.indexOf("[FUNCTION]") != "-1") {
+							return f.body.replace("[FUNCTION]", o.body);
 						} else {
 							return f.body + o.body;
 						}
