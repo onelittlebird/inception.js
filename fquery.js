@@ -179,7 +179,7 @@ function fQuery() {
 
 					for (var a in obj) {
 						if (typeof(obj[a]) == "object") {
-							new applyWrapper({object: obj[a]});
+							new applyWrapper({object: obj[a], wrapper: wrapper});
 						}
 						if (typeof(obj[a]) == "function") {
 
