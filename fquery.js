@@ -20,6 +20,16 @@
 	THE SOFTWARE.
 */
 
+/*
+
+	Author:		Filip Moberg
+	Name:		fQuery (SuckerPunch)
+	Version:	1.0
+	Version name:	SuckerPunch
+	Released:	2011-07-01
+
+*/
+
 function fQuery() {
 
 	var args = arguments;
