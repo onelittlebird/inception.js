@@ -1,4 +1,4 @@
-*
+/*
 	Copyright (c) 2010 Filip Moberg, (filip@mcsquare.se)
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
