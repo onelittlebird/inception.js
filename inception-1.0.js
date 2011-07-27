@@ -38,7 +38,7 @@ function inception() {
 
 	// Argument handler
 
-	if (args[0] && args[0].substr(0,1) == "@") {
+	if (args[0] && typeof args[0] === "string" && args[0].substr(0,1) === "@") {
 
 
 		// If first argument is an inception node
@@ -49,7 +49,7 @@ function inception() {
 			inception._node.push(m[i].replace("@", ""));
 		}
 
-	} else if(args[0] != undefined && jQuery && jQuery(args[0])[0] !== "") {
+	} else if(args[0] !== undefined && jQuery && jQuery(args[0])[0] !== "") {
 
 
 		// If first argument is a valid jQuery selector
@@ -57,7 +57,7 @@ function inception() {
 		inception.$ = jQuery(args[0]);
 	}
 
-	if (typeof(inception._init) == "undefined") {
+	if (inception._init == undefined) {
 
 
 		// Declare internal functions
@@ -358,8 +358,8 @@ function inception() {
 						$(obj).css(o.css);
 					}
 
-					if (o.attributes) {
-						$(obj).attr(o.attributes);
+					if (o.attr) {
+						$(obj).attr(o.attr);
 					}
 
 					if (o.bind) {
@@ -375,7 +375,7 @@ function inception() {
 
 				// Check if console is available
 
-				if (typeof(console) != "undefined") {
+				if (typeof console !== undefined) {
 					console.log(arguments[0]);
 				} else {
 					alert(arguments[0]);
@@ -386,7 +386,7 @@ function inception() {
 
 		// Merge core functions with the inception object
 
-		inception._internals.jQ.extend(inception, inception._init);
+		inception._internals.jQ.extend(true, inception, inception._init);
 	}
 
 	return inception._init;
