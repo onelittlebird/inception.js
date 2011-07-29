@@ -32,24 +32,23 @@
 
 function inception() {
 
-	var args = arguments;
-	var m;
+	var args = arguments, m, i;
 
 
 	// Argument handler
 
-	if (args[0] && typeof args[0] === "string" && args[0].substr(0,1) === "@") {
+	if (args[0] && typeof args[0] === "string" && args[0].substr(0, 1) === "@") {
 
 
 		// If first argument is an inception node
 
-		inception._node = new Array();
+		inception._node = [];
 		m = args[0].split(" ");
 		for (i=0; i < m.length; i++) {
 			inception._node.push(m[i].replace("@", ""));
 		}
 
-	} else if(args[0] !== undefined && jQuery && jQuery(args[0])[0] !== "") {
+	} else if (typeof args[0] !== "undefined" && typeof jQuery !== "undefined" && jQuery(args[0])[0] !== "") {
 
 
 		// If first argument is a valid jQuery selector
@@ -57,7 +56,7 @@ function inception() {
 		inception.$ = jQuery(args[0]);
 	}
 
-	if (inception._init == undefined) {
+	if (typeof inception._init === "undefined") {
 
 
 		// Declare internal functions
@@ -73,8 +72,8 @@ function inception() {
 				var string = arguments[0].toString();
 				var offset = string.indexOf("{");
 				var head = string.substr(0, offset);
-				var args = head.substr(head.indexOf("(")).replace("(","").replace(")","").replace(/ /g,"").split(",");
-				var body = string.substr(offset+1,string.length-offset-2);
+				var args = head.substr(head.indexOf("(")).replace("(", "").replace(")", "").replace(/ /g, "").split(",");
+				var body = string.substr(offset+1, string.length-offset-2);
 
 				return {
 					head : head,
@@ -143,7 +142,7 @@ function inception() {
 
 				// Create alias for selected node
 
-				if (inception._node && inception._node[0]) {
+				if (typeof inception._node !== "undefined" && typeof inception._node[0] !== "undefined") {
 
 					arr = inception._node[0] ? inception._node[0].split(".") : '';
 					obj = inception();
@@ -162,7 +161,7 @@ function inception() {
 					}
 				}
 
-				inception._node = new Array();
+				inception._node = [];
 			},
 
 			extend : function() {
@@ -181,6 +180,8 @@ function inception() {
 
 						if (f.body.indexOf("[FUNCTION]") != "-1") {
 							return f.body.replace("[FUNCTION]", o.body);
+						} else if (f.body.indexOf("$function") != "-1") {
+							return f.body.replace("$function", o.body);
 						} else {
 							return f.body + o.body;
 						}
@@ -190,10 +191,10 @@ function inception() {
 					var wrapper = arguments[0].wrapper;
 
 					for (var a in obj) {
-						if (typeof(obj[a]) == "object") {
+						if (typeof obj[a] === "object") {
 							new applyWrapper({object: obj[a], wrapper: wrapper});
 						}
-						if (typeof(obj[a]) == "function") {
+						if (typeof obj[a] === "function") {
 
 							var f = inception._internals.parseFunction(obj[a]);
 
@@ -215,11 +216,11 @@ function inception() {
 				for (i=0; i < inception._node.length; i++) {
 
 					arr = inception._node[i] ? inception._node[i].split(".") : '';
-					copy = new Array();
+					copy = [];
 					copy['function'] = inception._init;
 					copy['object'] = inception;
 					arg = arguments[0];
-					wrapper = new Array();
+					wrapper = [];
 					wrapper.push(inception._wrapper);
 					n = 0;
 
@@ -227,7 +228,7 @@ function inception() {
 					// Crawl to the last object of the chain
 
 					for (var k in arr) {
-						if (n == arr.length-1 && typeof(arg) == "function") {
+						if (n == arr.length-1 && typeof arg === "function") {
 							arg = new Object();
 							arg[arr[n]] = arguments[0];
 						} else {
@@ -238,7 +239,7 @@ function inception() {
 								copy['function'][key] = {};
 								copy['object'][key] = {};
 							}
-							if (typeof(copy['object'][key]._wrapper) != "undefined") {
+							if (typeof copy['object'][key]._wrapper !== "undefined") {
 								wrapper.push(copy['object'][key]._wrapper);
 							}
 
@@ -264,10 +265,10 @@ function inception() {
 
 				// If the extend targets the top node (can only be applied with an object, else inception would be overridden)
 
-				if (typeof(inception._node[0]) == "undefined" && typeof(arguments[0]) == "object") {
+				if (typeof inception._node[0] === "undefined" && typeof arguments[0] === "object") {
 
-					copy = new Array();
-					wrapper = new Array();
+					copy = [];
+					wrapper = [];
 					copy['function'] = inception._init;
 					copy['object'] = inception;
 					arg = arguments[0];
@@ -289,7 +290,7 @@ function inception() {
 
 				// Reset the _node to an empty array
 
-				inception._node = new Array();
+				inception._node = [];
 			},
 
 			wrap : function() {
@@ -303,7 +304,7 @@ function inception() {
 				for (i=0; i < inception._node.length; i++) {
 
 					arr = inception._node[i] ? inception._node[i].split(".") : '';
-					copy = new Array();
+					copy = [];
 					copy['function'] = inception._init;
 					copy['object'] = inception;
 
@@ -328,7 +329,7 @@ function inception() {
 				// Create wrapper for top node (and merge with default top node wrapper)
 
 				if (inception._node.length === 0) {
-					copy = new Array();
+					copy = [];
 					copy['function'] = inception._init;
 					copy['object'] = inception;
 
@@ -341,7 +342,7 @@ function inception() {
 
 				// Reset the _node to an empty array
 
-				inception._node = new Array();
+				inception._node = [];
 			},
 
 			append : function(o) {
@@ -349,10 +350,10 @@ function inception() {
 
 				// Faster than jQueries append, but lets you pass through css, bind and attribute objects to jQuery.
 
-				inception.$.each(function() {
+				return inception.$.each(function() {
 
 					var obj = document.createElement(o.element);
-					this.appendChild(obj);
+					var n = this.appendChild(obj);
 
 					if (o.css) {
 						$(obj).css(o.css);
@@ -375,7 +376,7 @@ function inception() {
 
 				// Check if console is available
 
-				if (typeof console !== undefined) {
+				if (typeof console !== "undefined") {
 					console.log(arguments[0]);
 				} else {
 					alert(arguments[0]);
