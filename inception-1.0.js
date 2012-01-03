@@ -18,86 +18,104 @@
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
+*/
+
+/*
 
 	Author:		Filip Moberg
 	Name:		inception.js
-	Version:	1.2
-	Codename:	Di Caprio
+	Version:	1.0
+	Version name:	SuckerPunch
 	Released:	2011-07-01
-	Comments:	This version was so awesome, it deserved a whole new version number. Totally rebuilt from scratch - inception revisited.
+
 */
 
-// Sandbox the environment
-(function(window, undefined) { 
+function inception() {
 
-	// Declare environment variables
-	var document = window.document, navigator = window.navigator, location = window.location;
+	var args = arguments, m, i;
 
 
-	// Create function in window object
-	window.inception = (function inception() {
+	// Argument handler
 
-		var env = this;
+	if (args[0] && typeof args[0] === "string" && args[0].substr(0, 1) === "@") {
 
-		// Make sure core function is instantiated
-		if (this === window) {
-			return new inception(arguments[0]);
+
+		// If first argument is an inception node
+
+		inception._node = [];
+		m = args[0].split(" ");
+		for (i=0; i < m.length; i++) {
+			inception._node.push(m[i].replace("@", ""));
 		}
 
-		// Declare core object (with core functions)
-		this.core = {
+	} else if (typeof args[0] !== "undefined" && typeof jQuery !== "undefined" && jQuery(args[0])[0] !== "") {
 
-			instance: arguments[0],
 
-			// Extend a primary object with a secondary
-			extend: function(o) {
+		// If first argument is a valid jQuery selector
 
-				// If set to true, the returned object will be a copy instead of pointer
-				if (typeof o.clone === "boolean" && o.clone === true) {
-					o.from = this.clone(o.from); 
-				}
+		inception.$ = jQuery(args[0]);
+	}
 
-				for (var n in o.from) {
-					if (o.construct === true && typeof o.from[n] === "function" && n !== "wrapper") {
+	if (typeof inception._init === "undefined") {
 
-						// Make a clone so the use of multiple selectors won't construct the same function twice
-						o.from = this.clone(o.from);
 
-						// Construct the function
-						o.from[n] = this.functionConstructor({method: o.from[n], func: n, node: o.node});
-					}
+		// Declare internal functions
 
-					if (typeof o.from[n] === "object" && n !== "selector" && n !== "$") {
+		inception._internals = {
+			wrapper : function() {
 
-						if (typeof o.to[n] === "undefined") {
-							if (o.from[n].constructor.toString().indexOf("Array") !== -1) {
-								o.to[n] = [];
-							} else {
-								o.to[n] = {};
-							}
-						}
-
-						this.extend({to: o.to[n], from: o.from[n], construct: o.construct, node: o.node});
-					} else {
-						o.to[n] = o.from[n];
-					}
-				}
-
-				return o.to;
+				var selector = sel = inception.$;
 			},
 
-			// Create deep copy of target object
-			clone: function() {
-				return this.extend({to: {}, from: arguments[0]});
+			parseFunction : function() {
+
+				var string = arguments[0].toString();
+				var offset = string.indexOf("{");
+				var head = string.substr(0, offset);
+				var args = head.substr(head.indexOf("(")).replace("(", "").replace(")", "").replace(/ /g, "").split(",");
+				var body = string.substr(offset+1, string.length-offset-2);
+
+				return {
+					head : head,
+					args : args,
+					body : body
+				};
 			},
 
-			// Count child objects
+			mergeFunctions : function() {
+
+				var p1 = inception._internals.parseFunction(arguments[0]);
+				var p2 = inception._internals.parseFunction(arguments[1]);
+
+				var body = p1.body + p2.body;
+				var args;
+
+				if (p1.args[0] !== "") {
+					args = p1.args;
+
+					if (p2.args[0] !== "") {
+						args = args.concat(p2.args);
+					}
+				} else if (p2.args[0] !== "") {
+					args = p2.args;
+				}
+
+				if (args) {
+					return new Function(args, "{"+body+"}");
+				} else {
+					return new Function("{"+body+"}");
+				}
+			},
+
 			count : function(o) {
+
+
+				// Count number of child nodes in selected object
 
 				var c = 0;
 
-				for (var o in arguments[0]) {
-					if (arguments[0].hasOwnProperty(o)) {
+				for (var k in o) {
+					if (o.hasOwnProperty(k)) {
 						++c;
 					}
 				}
@@ -105,273 +123,274 @@
 				return c;
 			},
 
-			// Create object from node string
-			stringToObject: function() {
+                        jQ : {hasOwn:Object.prototype.hasOwnProperty,isPlainObject:function(obj){if(!obj||typeof obj!=="object"||obj.nodeType||this.isWindow(obj)){return false}if(obj.constructor&&!this.hasOwn.call(obj,"constructor")&&!this.hasOwn.call(obj.constructor.prototype,"isPrototypeOf")){return false}var key;for(key in obj){}return key===undefined||this.hasOwn.call(obj,key)},isWindow:function(obj){return obj&&typeof obj==="object"&&"setInterval"in obj},isArray:Array.isArray||function(obj){return typeof obj==="array"},extend:function(){var options,name,src,copy,copyIsArray,clone,target=arguments[0]||{},i=1,length=arguments.length,deep=false;if(typeof target==="boolean"){deep=target;target=arguments[1]||{};i=2}if(typeof target!=="object"&&typeof target!=="function"){target={}}if(length===i){target=this;--i}for(;i<length;i++){if((options=arguments[i])!=null){for(name in options){src=target[name];copy=options[name];if(target===copy){continue}if(deep&&copy&&(this.isPlainObject(copy)||(copyIsArray=this.isArray(copy)))){if(copyIsArray){copyIsArray=false;clone=src&&this.isArray(src)?src:[]}else{clone=src&&this.isPlainObject(src)?src:{}}target[name]=this.extend(deep,clone,copy)}else if(copy!==undefined){target[name]=copy}}}}return target}}
+		};
 
-				var selector = arguments[0].replace(/ /g, "").split("@").slice(1), a = [], s, o, node, shell;
 
-				for (s in selector) {
-					node = selector[s].split(".");
+		// Set default top node wrapper
 
-					if (node[0] !== "") {
-						o = {};
-						shell = o;
+		inception._wrapper = inception._internals.wrapper;
 
-						for (i = 0; i < node.length-1; ++i) {
-							o = o[node[i]] = {};
-						}
 
-						if (arguments[1]) {
-							o = o[node[i]] = arguments[1];
-						} else {
-							o = o[node[i]] = {};
-						}
+		// Declare and initialize core functions
 
-						a.push(shell);
+		inception._init = {
+			alias : function() {
+
+				var arr, obj, key;
+
+
+				// Create alias for selected node
+
+				if (typeof inception._node !== "undefined" && typeof inception._node[0] !== "undefined") {
+
+					arr = inception._node[0] ? inception._node[0].split(".") : '';
+					obj = inception();
+
+					for (var i in arr) {
+						key = arr[i];
+						obj = obj[key];
+					}
+
+					window[arguments[0]] = obj;
+
+				} else {
+
+					for (i=0; i < arguments.length; i++) {
+						window[arguments[i]] = inception;
 					}
 				}
 
-				return a;
+				inception._node = [];
 			},
 
-			// Create selector from node string
-			stringToSelector: function() {
-				var a = [], n = this.stringToArray(arguments[0]);
+			extend : function() {
 
-				for (i in n) {
-					var s = n[i].split(".");
-					var node = env;
-					for (x in s) {
-						if (typeof node[s[x]] !== "undefined") {
-							node = node[s[x]];
-						}
-					}
-					a.push(node);
-				}
+				var arr, arg, copy, key, n, wrapper;
 
-				return a;
-			},
 
-			// Create array from node string
-			stringToArray: function() {
-				return arguments[0].replace(/ /g, "").split("@").slice(1);
-			},
+				// Declare wrapper function
 
-			// Wrapper engine. Used for fetching stored wrappers in runtime.
-			wrapper: {
-				cache: {
-				},
+				var applyWrapper = function() {
 
-				get: function(o) {
-					var wrapper, node = o.node.replace(/@/g, "").split("."), n;
+					var fetchWrapper = function(o) {
 
-					for (i in node) {
-						if (!n) {
-							n = node[i];
+						var f = inception._internals.parseFunction(o.wrapper);
+						var body;
+
+						if (f.body.indexOf("[FUNCTION]") != "-1") {
+							return f.body.replace("[FUNCTION]", o.body);
+						} else if (f.body.indexOf("$function") != "-1") {
+							return f.body.replace("$function", o.body);
 						} else {
-							n = n + "__" + node[i];
+							return f.body + o.body;
 						}
-						if (typeof env.core.wrapper.cache[n] === "function") {
-							wrapper = env.core.wrapper.cache[n];
+					};
+
+					var obj = arguments[0].object;
+					var wrapper = arguments[0].wrapper;
+
+					for (var a in obj) {
+						if (typeof obj[a] === "object") {
+							new applyWrapper({object: obj[a], wrapper: wrapper});
 						}
-					}
+						if (typeof obj[a] === "function") {
 
-					return wrapper;
-				}
-			},
+							var f = inception._internals.parseFunction(obj[a]);
 
-			// Construct user function(s)
-			functionConstructor: function(o) {
+							body = f.body;
+							args = f.args;
 
-				return function() {
+							for (var i=wrapper.length-1; i>=0; i--) {
+								body = fetchWrapper({body: body, wrapper: wrapper[i]});
+							}
 
-					// Set current selector
-					this[o.func].selector = this[o.func].$ = env.selector;
-					this[o.func].node = env.core.clone(env.node);
-
-					// Execute user function in correct environment and supress error messages
-					try {
-
-						if (o.wrapper = env.core.wrapper.get(o)) {
-							var self = this;
-							var args = arguments;
-							// Execute user function within a defined node wrapper
-							o.wrapper({
-								run: function() {
-									o.method.apply(self, args);
-								}
-							});
-						} else {
-							// Execute user function as ordinary
-							o.method.apply(this, arguments);
-						}
-
-					} catch(e) {
-
-						if (typeof console !== "undefined" && typeof console.log !== "undefined") {
-							console.log(e);
+							obj[a] = new Function(args, "{"+body+"}");
 						}
 					}
 				};
+
+
+				// Extend argument object(s) and function(s) to the end of the node chain
+
+				for (i=0; i < inception._node.length; i++) {
+
+					arr = inception._node[i] ? inception._node[i].split(".") : '';
+					copy = [];
+					copy['function'] = inception._init;
+					copy['object'] = inception;
+					arg = arguments[0];
+					wrapper = [];
+					wrapper.push(inception._wrapper);
+					n = 0;
+
+
+					// Crawl to the last object of the chain
+
+					for (var k in arr) {
+						if (n == arr.length-1 && typeof arg === "function") {
+							arg = new Object();
+							arg[arr[n]] = arguments[0];
+						} else {
+							key = arr[k];
+
+							if (!copy['function'][key]) {
+
+								copy['function'][key] = {};
+								copy['object'][key] = {};
+							}
+							if (typeof copy['object'][key]._wrapper !== "undefined") {
+								wrapper.push(copy['object'][key]._wrapper);
+							}
+
+							copy['function'] = copy['function'][key];
+							copy['object'] = copy['object'][key];
+						}
+
+						n++;
+					}
+
+
+					// Apply node wrappers (if any) to node functions
+
+					new applyWrapper({object: arg, wrapper: wrapper});
+
+
+					// Apply new object(s) to the inception tree
+
+					inception._internals.jQ.extend(true, copy['function'], arg);
+					inception._internals.jQ.extend(true, copy['object'], arg);
+				}
+
+
+				// If the extend targets the top node (can only be applied with an object, else inception would be overridden)
+
+				if (typeof inception._node[0] === "undefined" && typeof arguments[0] === "object") {
+
+					copy = [];
+					wrapper = [];
+					copy['function'] = inception._init;
+					copy['object'] = inception;
+					arg = arguments[0];
+					wrapper.push(inception._wrapper);
+
+
+					// Apply node wrappers (if any) to node functions
+
+					new applyWrapper({object: arg, wrapper: wrapper});
+
+
+					inception._internals.jQ.extend(true, copy['function'], arg);
+
+					for (var o in arg) {
+						copy['object'][o] = arg[o];
+					}
+				}
+
+
+				// Reset the _node to an empty array
+
+				inception._node = [];
 			},
 
-			// Error handling
-			error: function() {
+			wrap : function() {
 
-				throw new Error(arguments[0]);
-				return
+				var arr, copy, key;
+				var arg = arguments[0];
+
+
+				// Create wrapper for selected node(s)
+
+				for (i=0; i < inception._node.length; i++) {
+
+					arr = inception._node[i] ? inception._node[i].split(".") : '';
+					copy = [];
+					copy['function'] = inception._init;
+					copy['object'] = inception;
+
+					for (var k in arr) {
+						key = arr[k];
+
+						if (!copy['function'][key]) {
+
+							copy['function'][key] = {};
+							copy['object'][key] = {};
+						}
+
+						copy['function'] = copy['function'][key];
+						copy['object'] = copy['object'][key];
+					}
+
+					copy['function']._wrapper = arg;
+					copy['object']._wrapper = arg;
+				}
+
+
+				// Create wrapper for top node (and merge with default top node wrapper)
+
+				if (inception._node.length === 0) {
+					copy = [];
+					copy['function'] = inception._init;
+					copy['object'] = inception;
+
+					arg = inception._internals.mergeFunctions(inception._internals.wrapper, arg);
+
+					copy['function']._wrapper = arg;
+					copy['object']._wrapper = arg;
+				}
+
+
+				// Reset the _node to an empty array
+
+				inception._node = [];
+			},
+
+			append : function(o) {
+
+
+				// Faster than jQueries append, but lets you pass through css, bind and attribute objects to jQuery.
+
+				return inception.$.each(function() {
+
+					var obj = document.createElement(o.element);
+					var n = this.appendChild(obj);
+
+					if (o.css) {
+						$(obj).css(o.css);
+					}
+
+					if (o.attr) {
+						$(obj).attr(o.attr);
+					}
+
+					if (o.bind) {
+						for (var k in o.bind) {
+							$(obj).bind(k, o.bind[k]);
+						}
+					}
+				});
+			},
+
+			log : function() {
+
+
+				// Check if console is available
+
+				if (typeof console !== "undefined") {
+					console.log(arguments[0]);
+				} else {
+					alert(arguments[0]);
+				}
 			}
 		};
 
-		// Make the global object a reference to the instance function and return it
-		return new (window[arguments[0]] = function() {
 
-			// Extend core object with instance object internally
-			// Declare user functions and variables
-			var core = env.core.extend({to: env, from: {
+		// Merge core functions with the inception object
 
-				node: {
-					toString: "",
-					toArray: []
-				},
-
-				extend: function() {
-					var shell, s = [];
-
-					// Error on invalid selector
-					if (typeof this.selector === "undefined") {
-						return this.core.error("inception.js: Trying to extend with invalid node selector.");
-					}
-
-					// Error on false input object
-					if (typeof arguments[0] === "undefined") {
-						return this.core.error("inception.js: Trying to extend with invalid input object.");
-					}
-
-					// Create shell object of selector node(s)
-					shell = this.core.stringToObject(this.node.toString, arguments[0]);
-					node = this.node.toArray;
-
-					for (var i in shell) {
-						this.core.extend({to: this, from: shell[i], construct: true, node: node[i]});
-						s.push(shell[i]);
-					}
-
-					// Extend up to the global object
-					window[env.core.instance] = env.core.extend({to: window[env.core.instance], from: this});
-
-					// Return inception object
-					return env;
-				},
-
-				alias: function() {
-					return this.core.error("inception.js: Function alias() is deprecated. Please use the constructor instead -> new inception('your_framework'.");
-				},
-
-				// Create a new instance and extend with a copy of selected objects
-				clone: function() {
-
-					// XXX TODO Create a statement for selectors
-
-					// Create a new instance 
-					new inception(arguments[0]);
-
-					// Extend with core object
-					env.core.extend({to: window[arguments[0]], from: env.core.clone(env)});
-
-					// Extend with inner object
-					env.core.extend({to: window[arguments[0]](), from: env.core.clone(env)});
-
-					return env;
-				},
-
-				wrapper: function() {
-
-					if (typeof arguments[0] === "function") {
-						var a;
-						a = env.node.toString.replace(/\./g, "__").replace(/ /g, "").split("@").slice(1);
-
-						for (i in a) {
-							// Set wrapper cache
-							env.core.wrapper.cache[env.core.instance + "__" + a[i]] = arguments[0];
-
-							// Extend to core object
-							env.core.extend({to: window[env.core.instance].core.wrapper, from: env.core.wrapper});
-						}
-					}
-
-					return env;
-				},
-
-				wrap: function() {
-					return this.wrapper(arguments[0]);
-				}
-
-			}});
-
-			// Extend up to the global object
-			window[env.core.instance] = env.core.extend({to: window[env.core.instance], from: core});
-
-			// Append correct selector
-			if (typeof arguments[0] === "string" && arguments[0].indexOf("@") !== -1) {
-
-				// Set selector to an inception selector
-				env.$ = env.selector = env.core.stringToSelector(arguments[0]);
-
-				// Save original selector string
-				env.node.toString = arguments[0];
-				env.node.toArray = env.core.stringToArray(arguments[0]);
-
-			} else if (typeof window.jQuery === "function" && typeof window.jQuery(arguments[0])[0] !== "undefined") {
-
-				// Set selector to a jQuery selector
-				env.$ = env.selector = jQuery(arguments[0]);
-			} else {
-
-				// Clear all old selectors
-				env.node.toString = "";
-				env.node.toArray = "";
-				env.$ = env.selector = [];
-			}
-		
-			// Return extended core object
-			return core;
-		});
-	});
-
-})(window);
-
-new inception("dev");
-new inception("mcsquare");
-
-mcsquare("@test").wrapper(function(o) {
-	console.log('first start');
-	o.run();
-	console.log('first end');
-});
-
-mcsquare("@test.blob").wrapper(function(o) {
-	console.log('second start');
-	o.run();
-	console.log('second end');
-});
-
-mcsquare("@test.blob.case1 @test.blob.case2").extend({
-	func1: function() {
-		var sel = this.func1.selector;
-		setInterval(function() {
-			console.log(sel);
-		}, 1000);
-	},
-	func2: function() {
-		var sel = this.func2.selector;
-		setInterval(function() {
-			console.log(sel);
-		}, 1000);
+		inception._internals.jQ.extend(true, inception, inception._init);
 	}
-}).wrapper(function(o) {
-	var filip = "hooo";
-	console.log('third start');
-	o.run();
-	console.log('third end');
-});
+
+	return inception._init;
+}
+
+inception();
