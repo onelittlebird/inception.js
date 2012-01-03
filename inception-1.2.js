@@ -78,6 +78,12 @@
 						var core = env.__core__, node = [core.instance].concat(o.node.replace(/@/g, "").split(".")), wrapper = node[0], cache;
 						o.wrapper = [];
 
+						cache = core.wrapper.cache[core.instance];
+
+						if (typeof cache === "function") {
+							o.wrapper.push(cache);
+						}
+
 						for (var i=1; i < node.length; ++i) {
 							wrapper = wrapper + "__" + node[i];
 							cache = core.wrapper.cache[wrapper];
@@ -379,7 +385,14 @@
 
 						a = core.node.toString.replace(/\./g, "__").replace(/ /g, "").split("@").slice(1);
 
+						if (a.length === 0) {
+
+							// Set wrapper cache
+							core.wrapper.cache[core.instance] = arguments[0];
+						}
+
 						for (i in a) {
+
 							// Set wrapper cache
 							core.wrapper.cache[core.instance + "__" + a[i]] = arguments[0];
 
