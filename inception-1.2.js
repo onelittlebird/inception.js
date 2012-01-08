@@ -232,7 +232,9 @@
 							if (typeof window.jQuery === "function") {
 
 								window.jQuery(window[core.settings.jQuery.ready]).ready(function() {
-									o.method();
+
+									// Call method with its parent object as reference
+									o.method.call(window[self.instance][o.node]);
 								});
 
 							} else {
@@ -241,7 +243,9 @@
 
 								window.onload = function() {
 									for (o in self.onload) {
-										self.onload[o]();
+
+										// Call method with its parent object as reference
+										self.onload[o].call(window[self.instance][o.node]);
 									}
 								}
 							}
@@ -275,6 +279,8 @@
 								// Execute user function inside wrappers (if available)
 								return o.wrapper.call({
 									call: function() {
+
+										// Apply method with its parent object as reference
 										return o.method.apply(self, args);
 									}
 								});
