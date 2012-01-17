@@ -318,8 +318,8 @@
 				// Default node and selector values
 				__core__: {
 					node: {
-						toString: "",
-						toArray: []
+						getString: "",
+						getArray: []
 					},
 					selector: []
 				},
@@ -329,7 +329,7 @@
 					var shell, s = [];
 
 					// Error on invalid node selector
-					if (typeof core.node.toArray[0] === "undefined") {
+					if (typeof core.node.getArray[0] === "undefined") {
 						return core.error("inception.js: Trying to extend with invalid node selector.");
 					}
 
@@ -339,10 +339,10 @@
 					}
 
 					// Create shell object of selector node(s)
-					shell = core.stringToObject(core.node.toString, arguments[0]);
+					shell = core.stringToObject(core.node.getString, arguments[0]);
 
 					// Match shell with node array
-					node = core.node.toArray;
+					node = core.node.getArray;
 
 					// Iterate over shell and extend each node
 					for (var i in shell) {
@@ -365,7 +365,7 @@
 					if (arg) {
 						name.push(arg);
 					} else {
-						name = core.node.toArray; 
+						name = core.node.getArray; 
 					}
 
 					for (i in name) {
@@ -389,7 +389,7 @@
 
 					if (typeof arguments[0] === "function") {
 
-						a = core.node.toString.replace(/\./g, "__").replace(/ /g, "").split("@").slice(1);
+						a = core.node.getString.replace(/\./g, "__").replace(/ /g, "").split("@").slice(1);
 
 						if (a.length === 0) {
 
@@ -460,8 +460,8 @@
 				core.$ = core.selector = core.stringToSelector(arguments[0]);
 
 				// Save original selector string
-				core.node.toString = arguments[0];
-				core.node.toArray = core.stringToArray(arguments[0]);
+				core.node.getString = arguments[0];
+				core.node.getArray = core.stringToArray(arguments[0]);
 
 			} else if (typeof window.jQuery === "function") {
 
@@ -470,8 +470,8 @@
 			} else {
 
 				// Clear all old selectors
-				core.node.toString = "";
-				core.node.toArray = "";
+				core.node.getString = "";
+				core.node.getArray = "";
 				core.$ = core.selector = [];
 			}
 		
