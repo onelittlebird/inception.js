@@ -28,6 +28,7 @@
 */
 
 // Sandbox the environment
+/** @param {...undefined} undefined */
 (function(window, undefined) { 
 
 	// Declare environment variables
@@ -35,7 +36,8 @@
 
 
 	// Create function in window object
-	window.inception = (function inception() {
+	/** @constructor */
+	window.inception = (function inception(oo) {
 
 		var env = this;
 		var self = this;
@@ -128,10 +130,10 @@
 			// Count child objects
 			count : function(o) {
 
-				var c = 0;
+				var c = 0, i;
 
-				for (var o in arguments[0]) {
-					if (arguments[0].hasOwnProperty(o)) {
+				for (i in o) {
+					if (o.hasOwnProperty(o)) {
 						++c;
 					}
 				}
@@ -142,7 +144,7 @@
 			// Create object from node string
 			stringToObject: function() {
 
-				var selector = arguments[0].replace(/ /g, "").split("@").slice(1), a = [], s, o, node, shell;
+				var selector = arguments[0].replace(/ /g, "").split("@").slice(1), a = [], s, o, i, node, shell;
 
 				for (s in selector) {
 					node = selector[s].split(".");
@@ -170,7 +172,7 @@
 
 			// Create selector from node string
 			stringToSelector: function() {
-				var a = [], n = this.stringToArray(arguments[0]);
+				var a = [], n = this.stringToArray(arguments[0]), i, x;
 
 				for (i in n) {
 					var s = n[i].split(".");
@@ -201,7 +203,7 @@
 				},
 
 				get: function(o) {
-					var wrapper, core = env.__core__, node = [core.instance].concat(o.node.replace(/@/g, "").split(".")), n;
+					var wrapper, core = env.__core__, node = [core.instance].concat(o.node.replace(/@/g, "").split(".")), n, i;
 
 					for (i in node) {
 						if (!n) {
@@ -307,6 +309,7 @@
 		};
 
 		// Make the global object a reference to the instance function and return it
+		/** @constructor */
 		return new (window[arguments[0]] = function() {
 
 			var extended, core = env.__core__;
@@ -326,7 +329,7 @@
 
 				// Extend selected node(s) with given object/function
 				extend: function() {
-					var shell, s = [];
+					var shell, s = [], node;
 
 					// Error on invalid node selector
 					if (typeof core.node.getArray[0] === "undefined") {
@@ -419,7 +422,7 @@
 
 				// a DOM helper, to easily create new elements through jQuery. This actually is more of a jQuery plugin, but it's often useful - so I included it.
 				append: function() {
-					var core = env.__core__, o = arguments[0];
+					var core = env.__core__, o = arguments[0], jQuery = window.jQuery;
 
 					// Faster than jQueries append, but lets you pass through css, bind and attribute objects to jQuery.
 					if (typeof window.jQuery === "function") {
@@ -431,16 +434,16 @@
 							}
 
 							if (o.css) {
-								$(obj).css(o.css);
+								jQuery(obj).css(o.css);
 							}
 
 							if (o.attr) {
-								$(obj).attr(o.attr);
+								jQuery(obj).attr(o.attr);
 							}
 
 							if (o.bind) {
 								for (var k in o.bind) {
-									$(obj).bind(k, o.bind[k]);
+									jQuery(obj).bind(k, o.bind[k]);
 								}
 							}
 						});
@@ -466,7 +469,7 @@
 			} else if (typeof window.jQuery === "function") {
 
 				// Set selector to a jQuery selector (if it's not an inception selector and if jQuery is present)
-				core.$ = core.selector = jQuery(arguments[0]);
+				core.$ = core.selector = window.jQuery(arguments[0]);
 			} else {
 
 				// Clear all old selectors
