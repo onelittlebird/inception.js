@@ -1,0 +1,15 @@
+How to minify Inception using Closure Compiler:
+$ java -jar compiler.jar \
+		--warning_level VERBOSE \
+		--compilation_level ADVANCED_OPTIMIZATIONS \
+		--js inception-1.2.js \
+		--js_output_file inception-1.2.min.js \
+		--externs ../jquery-1.7.js
+
+You can find externs files here:
+http://closure-compiler.googlecode.com/svn/trunk/contrib/externs/
+
+Current gain:
+$ wc inception-1.2*.js
+     486    1632   12790 inception-1.2.js
+       8     111    3668 inception-1.2.min.js
