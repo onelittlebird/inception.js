@@ -470,6 +470,10 @@
 
 				// Set selector to a jQuery selector (if it's not an inception selector and if jQuery is present)
 				core.$ = core.selector = window.jQuery(arguments[0]);
+			} else if (arguments[0]) {
+
+				// Use native javascript CSS selector
+				core.$ = core.selector = document.querySelectorAll(arguments[0]);
 			} else {
 
 				// Clear all old selectors
