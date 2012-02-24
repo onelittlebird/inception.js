@@ -235,6 +235,12 @@
 
 								window.jQuery(window[core.settings.jQuery.ready]).ready(function() {
 
+									o.nodeKeys = o.node.split(".");
+									o.parentNode = window[self.instance];
+									for (var i in o.nodeKeys) {
+										o.parentNode = o.parentNode[o.nodeKeys[i]];
+									}
+
 									// Call method with its parent object as reference
 									o.method.call(window[self.instance][o.node]);
 								});
@@ -245,6 +251,12 @@
 
 								window.onload = function() {
 									for (o in self.onload) {
+
+										o.nodeKeys = o.node.split(".");
+										o.parentNode = window[self.instance];
+										for (var i in o.nodeKeys) {
+											o.parentNode = o.parentNode[o.nodeKeys[i]];
+										}
 
 										// Call method with its parent object as reference
 										self.onload[o].call(window[self.instance][o.node]);
