@@ -242,7 +242,7 @@
 									}
 
 									// Call method with its parent object as reference
-									o.method.call(window[self.instance][o.node]);
+									o.method.call(o.parentNode);
 								});
 
 							} else {
@@ -259,7 +259,7 @@
 										}
 
 										// Call method with its parent object as reference
-										self.onload[o].call(window[self.instance][o.node]);
+										self.onload[o].call(o.parentNode);
 									}
 								}
 							}
