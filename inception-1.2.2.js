@@ -21,9 +21,9 @@
 
 	Author:		Filip Moberg
 	Name:		inception.js
-	Version:	1.2
+	Version:	1.2.3
 	Codename:	Di Caprio
-	Released:	2012-01-03
+	Released:	2012-08-23
 	Comments:	This version was so awesome, it deserved TWO new version numbers. Totally rebuilt from scratch - inception revisited.
 */
 
