@@ -34,7 +34,7 @@
 		window = this;
 		__isBrowser = false;
 	} else {
-		__isBrowser = false;
+		__isBrowser = true;
 	}
 })();
 
