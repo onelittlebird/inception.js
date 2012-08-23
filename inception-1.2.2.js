@@ -27,6 +27,18 @@
 	Comments:	This version was so awesome, it deserved TWO new version numbers. Totally rebuilt from scratch - inception revisited.
 */
 
+
+// Root reference combatibility (for execution in a non browser environment)
+(function () {
+	if (typeof window === "undefined") {
+		window = this;
+		__isBrowser = false;
+	} else {
+		__isBrowser = false;
+	}
+})();
+
+
 // Sandbox the environment
 /** @param {...undefined} undefined */
 (function(window, undefined) { 
@@ -242,7 +254,7 @@
 									}
 
 									// Call method with its parent object as reference
-									o.method.call(window[self.instance][o.node]);
+									o.method.call(o.parentNode);
 								});
 
 							} else {
@@ -259,7 +271,7 @@
 										}
 
 										// Call method with its parent object as reference
-										self.onload[o].call(window[self.instance][o.node]);
+										self.onload[o].call(o.parentNode);
 									}
 								}
 							}
@@ -478,7 +490,7 @@
 
 				// Set selector to a jQuery selector (if it's not an inception selector and if jQuery is present)
 				core.$ = core.selector = window.jQuery(arguments[0]);
-			} else if (arguments[0]) {
+			} else if (arguments[0] && __isBrowser) {
 
 				// Use native javascript CSS selector
 				core.$ = core.selector = document.querySelectorAll(arguments[0]);
