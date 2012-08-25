@@ -1,3 +1,17 @@
+Targets:
+	# Clean build files
+	make clean
+
+	# Build core and module files
+	make build
+
+	# Merge core and module files into the inception template
+	make install
+
+	# Do all of the above
+	make all
+
+
 How to minify Inception using Closure Compiler:
 $ java -jar compiler.jar \
 		--warning_level VERBOSE \
