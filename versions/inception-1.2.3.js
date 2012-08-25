@@ -63,6 +63,10 @@
 		// Declare core object (with core functions)
 		this.__core__ = {
 
+			onload: [],
+
+			instance: arguments[0],
+
 			settings: {
 				jQuery: {
 					ready: "document"
@@ -71,10 +75,6 @@
 					show: true
 				}
 			},
-
-			onload: [],
-
-			instance: arguments[0],
 
 			// Extend a primary object with a secondary
 			extend: function(o) {
