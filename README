@@ -1,3 +1,5 @@
+NOW COMATIBLE WITH NODE.JS!
+
 Targets:
 	# Clean build files
 	make clean
@@ -27,3 +29,5 @@ Current gain:
 $ wc inception-1.2*.js
      486    1632   12790 inception-1.2.js
        8     111    3668 inception-1.2.min.js
+
+DON'T PANIC. / FM
