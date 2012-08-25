@@ -22,7 +22,7 @@
 
 	Author:		[ PRAGMA :: HEADER_AUTHOR ]
 	Name:		inception.js
-	Version:	[ PRAGMA :: HEADER_VERSION ]-[ PRAGMA :: HEADER_HASH ]
+	Version:	[ PRAGMA :: HEADER_VERSION ]
 	Codename:	[ PRAGMA :: HEADER_CODENAME ]
 	Released:	[ PRAGMA :: HEADER_RELEASE_DATE ]
 */
