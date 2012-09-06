@@ -30,11 +30,12 @@
 
 // Root reference combatibility (for execution in a non browser environment)
 (function () {
+
 	if (typeof window === "undefined") {
 		window = this;
-		__isBrowser = false;
+		var __isBrowser = false;
 	} else {
-		__isBrowser = true;
+		var __isBrowser = true;
 	}
 })();
 

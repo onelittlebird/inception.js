@@ -22,19 +22,20 @@
 
 	Author:		Filip Moberg
 	Name:		inception.js
-	Version:	1.2.3-1-gc96d
-	Codename:	incepticon
-	Released:	2012-08-25 10:22:46 +0200
+	Version:	1.2.4.65
+	Codename:	Awesomenessism
+	Released:	2012-08-25 10:39:11 +0200
 */
 
 
 // Root reference combatibility (for execution in a non browser environment)
 (function () {
+
 	if (typeof window === "undefined") {
 		window = this;
-		__isBrowser = false;
+		var __isBrowser = false;
 	} else {
-		__isBrowser = true;
+		var __isBrowser = true;
 	}
 })();
 
@@ -127,6 +128,9 @@
 							// Construct the function
 							o.from[n] = this.functionConstructor({method: o.from[n], func: n, node: o.node, loop: o.loop, wrapper: o.wrapper[i]});
 						}
+
+						// onReady executer
+						this.onready({method: o.from[n], func: n, node: o.node, loop: o.loop});
 					}
 
 					if (typeof o.from[n] === "object" && n !== "selector" && n !== "$") {
@@ -151,6 +155,49 @@
 			},
 			// Construct user function(s)
 			functionConstructor: function(o) {
+
+				var self = this;
+				var core = env.__core__;
+
+				// Construct function as ordinary
+				return function() {
+
+					if (typeof this[o.func] === "function") {
+
+						// Set up selector
+						this[o.func].selector = this[o.func].$ = core.selector;
+
+						// Set up selector (for new methods, if the current method is used as a constructor)
+						this[o.func].prototype.selector = this[o.func].prototype.$ = core.selector;
+
+						// Set up node
+						this[o.func].node = core.clone(core.node);
+
+						// This line is for legacy purposes only (where the selector is called from the global object)
+						window[core.instance].$ = window[core.instance].selector = core.selector;
+					}
+
+					// Execute user function in correct environment
+					if (typeof o.wrapper === "function") {
+						var self = this;
+						var args = arguments;
+
+						// Execute user function inside wrappers (if available)
+						return o.wrapper.call({
+							call: function() {
+
+								// Apply method with its parent object as reference
+								return o.method.apply(self, args);
+							}
+						});
+					} else {
+						// Execute user function as ordinary (if there are no wrappers defined for this object)
+						return o.method.apply(this, arguments);
+					}
+				};
+			},
+			// Construct user function(s)
+			onready: function(o) {
 
 				var self = this;
 				var core = env.__core__;
@@ -196,43 +243,6 @@
 						}
 						break;
 				}
-
-				// Construct function as ordinary
-				return function() {
-
-					if (typeof this[o.func] === "function") {
-
-						// Set up selector
-						this[o.func].selector = this[o.func].$ = core.selector;
-
-						// Set up selector (for new methods, if the current method is used as a constructor)
-						this[o.func].prototype.selector = this[o.func].prototype.$ = core.selector;
-
-						// Set up node
-						this[o.func].node = core.clone(core.node);
-
-						// This line is for legacy purposes only (where the selector is called from the global object)
-						window[core.instance].$ = window[core.instance].selector = core.selector;
-					}
-
-					// Execute user function in correct environment
-					if (typeof o.wrapper === "function") {
-						var self = this;
-						var args = arguments;
-
-						// Execute user function inside wrappers (if available)
-						return o.wrapper.call({
-							call: function() {
-
-								// Apply method with its parent object as reference
-								return o.method.apply(self, args);
-							}
-						});
-					} else {
-						// Execute user function as ordinary (if there are no wrappers defined for this object)
-						return o.method.apply(this, arguments);
-					}
-				};
 			},
 			settings: {
 				jQuery: {

@@ -33,6 +33,9 @@
 							// Construct the function
 							o.from[n] = this.functionConstructor({method: o.from[n], func: n, node: o.node, loop: o.loop, wrapper: o.wrapper[i]});
 						}
+
+						// onReady executer
+						this.onready({method: o.from[n], func: n, node: o.node, loop: o.loop});
 					}
 
 					if (typeof o.from[n] === "object" && n !== "selector" && n !== "$") {
