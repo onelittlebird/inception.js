@@ -13,7 +13,9 @@
 						this[o.func].selector = this[o.func].$ = core.selector;
 
 						// Set up selector (for new methods, if the current method is used as a constructor)
-						this[o.func].prototype.selector = this[o.func].prototype.$ = core.selector;
+						if (this[o.func].prototype) {
+							this[o.func].prototype.selector = this[o.func].prototype.$ = core.selector;
+						}
 
 						// Set up node
 						this[o.func].node = core.clone(core.node);
