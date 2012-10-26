@@ -1,6 +1,11 @@
 			// Extend a primary object with a secondary
 			extend: function(o) {
 
+				// Make sure the environment is from the global scope.
+                                if (env && env.__core__ && window[env.__core__.instance]) {
+                                        env = window[env.__core__.instance];
+                                }	
+
 				// If set to true, the returned object will be a copy instead of reference
 				if (o.clone === true) {
 					o.from = this.clone(o.from); 
